@@ -44,7 +44,7 @@ async def on_message(message):
             data[aid] = {'points': 0, 'last_workout': datetime.now()}
 
         data[aid]['points'] += 1
-        date[aid]['last_workout'] = datetime.now()
+        data[aid]['last_workout'] = datetime.now()
 
         with open(fname, 'w') as f:
             json.dump(data, f)
