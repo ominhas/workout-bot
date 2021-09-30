@@ -62,7 +62,8 @@ class CommandHandler:
         with WorkoutLogger(DATA_FILE) as wl:
             removed_test = wl.remove_last_workout(name)
         if removed_test:
-            points = get_points
+            with WorkoutLogger(DATA_FILE) as wl:
+                points = wl.get_points(name)
             if points == 0:
                 response = "You don't have any more points."
             elif points == 1:
