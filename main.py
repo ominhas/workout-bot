@@ -1,13 +1,13 @@
 import os
 import discord
-from dotenv import load_dotenv
+import redis
 from command_handler import CommandHandler
 
-
-load_dotenv()
-TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD = os.getenv('DISCORD_GUILD')
+# https://python.plainenglish.io/hosting-a-python-discord-bot-using-aws-redis-7a320b2702a0
+redis_server = redis.Redis() # Create access to Redis
 client = discord.Client()
+# TOKEN = os.getenv('DISCORD_TOKEN')
+TOKEN = str(redis_server.get("DISCORD_TOKEN").decode("utf-8"))
 
 
 @client.event
