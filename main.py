@@ -6,7 +6,8 @@ from command_handler import CommandHandler
 # https://python.plainenglish.io/hosting-a-python-discord-bot-using-aws-redis-7a320b2702a0
 redis_server = redis.Redis() # Create access to Redis
 client = discord.Client()
-# TOKEN = os.getenv('DISCORD_TOKEN')
+if redis_server.get("DISCORD_TOKEN") is None:
+    raise Exception("redis token DISCORD_TOKEN not set")
 TOKEN = str(redis_server.get("DISCORD_TOKEN").decode("utf-8"))
 
 
