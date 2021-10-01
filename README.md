@@ -9,7 +9,8 @@ git clone https://github.com/zainhussaini/workout-bot.git
 ```
 
 2. Create a Discord bot and generate a token at https://discord.com/developers/docs/topics/oauth2. At this step you can also add it to your Discord sever(s).
-
+   1. Select `bot` in scopes
+   2. Select `Send Messages` and `Read Message History` in bot permissions
 3. Set up redis server
 ```bash
 sudo apt install redis
