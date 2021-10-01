@@ -1,8 +1,6 @@
 from workout_logger import WorkoutLogger
 from tabulate import tabulate
 
-DATA_FILE = "workouts.csv"
-
 
 def pretty_delta(diff):
     # based on https://stackoverflow.com/a/5164027
@@ -49,6 +47,7 @@ class CommandHandler:
         return None
 
     def _point(message):
+        DATA_FILE = f"workouts-{message.guild.id}.csv"
         name = str(message.author)
         with WorkoutLogger(DATA_FILE) as wl:
             time_diff, points = wl.add_workout(name)
@@ -59,6 +58,7 @@ class CommandHandler:
         return response
 
     def _loser(message):
+        DATA_FILE = f"workouts-{message.guild.id}.csv"
         name = str(message.author)
         with WorkoutLogger(DATA_FILE) as wl:
             removed_test = wl.remove_last_workout(name)
@@ -76,6 +76,7 @@ class CommandHandler:
         return response
 
     def _scoreboard(message):
+        DATA_FILE = f"workouts-{message.guild.id}.csv"
         with WorkoutLogger(DATA_FILE) as wl:
             sorted_names, name_to_points = wl.get_leaderboard()
         if not sorted_names:
@@ -87,6 +88,7 @@ class CommandHandler:
         return "```\n" + tabulate(table, headers) + "\n```"
 
     def _resetscoreboard(message):
+        DATA_FILE = f"workouts-{message.guild.id}.csv"
         with WorkoutLogger(DATA_FILE) as wl:
             wl.reset_leaderboard()
         response = "Scoreboard has been reset!"
