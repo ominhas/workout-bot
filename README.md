@@ -24,3 +24,8 @@ pip3 install -U discord.py tabulate pandas datetime redis
 ```bash
 python3 main.py
 ```
+
+### TODO
+1. Add unit testing
+2. Add a voting system for resetscoreboard?
+3. Separate data-logging for different servers under same bot instance

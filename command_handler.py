@@ -110,7 +110,3 @@ COMMAND_MAP = {
     "resetscoreboard": CommandHandler._resetscoreboard,
     "help": CommandHandler._help
 }
-
-
-if __name__ == "__main__":
-    print(CommandHandler._scoreboard(""))

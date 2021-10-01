@@ -99,11 +99,3 @@ class WorkoutLogger:
 
     def _show_data(self):
         print(self.df)
-
-
-if __name__ == "__main__":
-    with WorkoutLogger("workouts.csv") as wl:
-        wl.add_workout("zain")
-        sorted_names, name_to_points = wl.get_leaderboard()
-        print(sorted_names)
-        print(name_to_points)
