@@ -38,11 +38,8 @@ class CommandHandler:
 
     def _find_command(text):
         if text.startswith("!"):
-            command = text.split(" ")[0][1:]
+            command = [1:]
             if command in COMMAND_MAP:
-                if len(text.split(" ")) != 1:
-                    # return f"Command {command} does not take arguments"
-                    return None
                 return COMMAND_MAP[command]
         return None
 
