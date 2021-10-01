@@ -20,9 +20,13 @@ set 'DISCORD_TOKEN' '<insert token here>'
 ```bash
 pip3 install -U discord.py tabulate pandas datetime redis
 ```
-5. Run the program
+5. Test the program
 ```bash
 python3 main.py
+```
+6. Run the program in background
+```bash
+nohup python3 main.py &
 ```
 
 ### TODO
