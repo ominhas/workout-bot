@@ -25,6 +25,23 @@ def pretty_delta(diff):
         return '{} hours ago'.format(s//3600)
 
 
+def shorten_name(name, length=None):
+    """Removes id portion of name, and if name is still longer than length,
+    shortens it with ellipses. If length is None, then don't shorten with ellipses.
+    """
+    if "#" not in name:
+        raise Exception("Expected name to be in format name#0000, but missing '#'")
+    if length is not None and length < 3:
+        raise Exception(f"shorten_name requires length >= 3, got {length}")
+
+    name = name.split("#")[0]
+    if length is None or len(name) < length:
+        return name
+    else:
+        return name[:length-3] + "."*3
+
+
+
 class CommandHandler:
     def handle_command(message):
         # remove surrounding white space
@@ -81,7 +98,9 @@ class CommandHandler:
         table = []
         headers = ["Rank", "Name", "Points"]
         for i, name in enumerate(sorted_names):
-            table.append([i+1, name, name_to_points[name]])
+            # using 14 because that's minimum screen size report by users
+            shortened_name = shorten_name(name, 14)
+            table.append([i+1, shortened_name, name_to_points[name]])
         return "```\n" + tabulate(table, headers) + "\n```"
 
     def _resetscoreboard(message):
