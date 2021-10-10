@@ -55,7 +55,7 @@ class CommandHandler:
 
     def _find_command(text):
         if text.startswith("!"):
-            command = text[1:]
+            command = text[1:].split(' ')[0]
             if command in COMMAND_MAP:
                 return COMMAND_MAP[command]
         return None
