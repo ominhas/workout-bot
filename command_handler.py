@@ -1,84 +1,112 @@
+from numpy.lib.histograms import _search_sorted_inclusive
 from workout_logger import WorkoutLogger
 from tabulate import tabulate
+import datetime
+import discord
 
 
-def pretty_delta(diff):
+def pretty_delta(date: datetime.datetime, now: datetime.datetime):
+    """Pretty time difference for saying how long ago workout was.
+
+    < 0 => "in the future?"
+    < 2 seconds => "just now"
+    < 1 minute => "x seconds ago"
+    < 2 minutes => "1 minute ago"
+    < 1 hour => "x minutes ago"
+    < 2 hours => "1 hour ago"
+    < 1 day => "x hours ago"
+    < 14 days => "days ago"
+    < 60 days => show date with format "on January 1"
+    > 60 days year => show date with format "on January 1, 2020"
+    """
     # based on https://stackoverflow.com/a/5164027
-    s = diff.seconds
-    if diff.days > 7 or diff.days < 0:
-        return d.strftime('%d %b %y')
-    elif diff.days == 1:
-        return '1 day ago'
-    elif diff.days > 1:
-        return '{} days ago'.format(diff.days)
-    elif s <= 1:
-        return 'just now'
-    elif s < 60:
-        return '{} seconds ago'.format(s)
-    elif s < 120:
-        return '1 minute ago'
-    elif s < 3600:
-        return '{} minutes ago'.format(s//60)
-    elif s < 7200:
-        return '1 hour ago'
+    diff = now - date
+    total_seconds = diff.total_seconds()
+    if total_seconds < 0:
+        return "in the future?"
+    elif total_seconds < 2:
+        return f"just now"
+    elif total_seconds < 60:
+        return f"{int(total_seconds)} seconds ago"
+    elif total_seconds < 2*60:
+        return f"1 minute ago"
+    elif total_seconds < 60*60:
+        return f"{int(total_seconds)//60} minutes ago"
+    elif total_seconds < 2*60*60:
+        return f"1 hour ago"
+    elif total_seconds < 24*60*60:
+        return f"{int(total_seconds)//(60*60)} hours ago"
+    elif total_seconds < 2*24*60*60:
+        return f"1 day ago"
+    elif total_seconds < 14*24*60*60:
+        return f"{int(total_seconds)//(24*60*60)} days ago"
+    elif total_seconds < 60*24*60*60:
+        return date.strftime("on %B %d")
     else:
-        return '{} hours ago'.format(s//3600)
+        return date.strftime("on %B %d, %Y")
 
 
 def shorten_name(name, length=None):
     """Removes id portion of name, and if name is still longer than length,
     shortens it with ellipses. If length is None, then don't shorten with ellipses.
     """
-    if "#" not in name:
-        raise Exception("Expected name to be in format name#0000, but missing '#'")
+    if "#" in name:
+        raise Exception("Warning: passed name with '#' in it")
     if length is not None and length < 3:
         raise Exception(f"shorten_name requires length >= 3, got {length}")
 
-    name = name.split("#")[0]
-    if length is None or len(name) < length:
+    if length is None or len(name) <= length:
         return name
     else:
         return name[:length-3] + "."*3
 
 
-
 class CommandHandler:
-    def handle_command(message):
+    def handle_command(message: discord.Message):
         # remove surrounding white space
         text = message.content.strip()
-
-        function = CommandHandler._find_command(text)
-        if function is None:
+        # only look at commands starting with "!"
+        if text[0] != "!":
             return None
-        else:
-            return function(message)
 
-    def _find_command(text):
-        if text.startswith("!"):
-            command = text[1:]
-            if command in COMMAND_MAP:
-                return COMMAND_MAP[command]
-        return None
+        # extract the root of the command (ie. "!point 12" -> "point")
+        base_command = text.split(" ")[0][1:]
+        if base_command not in COMMAND_MAP:
+            # response None indicates that command is ignored
+            return None
+        function = COMMAND_MAP[base_command]
 
-    def _point(message):
-        DATA_FILE = f"workouts-{message.guild.id}.csv"
-        name = str(message.author)
-        with WorkoutLogger(DATA_FILE) as wl:
-            time_diff, points = wl.add_workout(name)
-        if time_diff is None:
+        # extract args list by seperating out words, ignoring multiple spaces
+        args = [a for a in text.split(" ")[1:] if a]
+        return function(message, args)
+
+    def _point(message: discord.Message, args) -> str:
+        if args:
+            response = "Command !point does not take any arguments"
+            return response
+
+        # validate args
+        id = str(message.author.id)
+        with WorkoutLogger(message.guild.id) as wl:
+            last_workout_date, points = wl.add_workout(id)
+        if last_workout_date is None:
             response = "You now have 1 point. Congrats on the first workout!"
         else:
-            response = f"You now have {points} points. The workout before this was {pretty_delta(time_diff)}."
+            now = datetime.datetime.now()
+            response = f"You now have {points} points. The workout before this was {pretty_delta(last_workout_date, now)}."
         return response
 
-    def _loser(message):
-        DATA_FILE = f"workouts-{message.guild.id}.csv"
-        name = str(message.author)
-        with WorkoutLogger(DATA_FILE) as wl:
-            removed_test = wl.remove_last_workout(name)
+    def _loser(message: discord.Message, args) -> str:
+        if args:
+            response = "Command !loser does not take any arguments"
+            return response
+
+        id = str(message.author.id)
+        with WorkoutLogger(message.guild.id) as wl:
+            removed_test = wl.remove_last_workout(id)
         if removed_test:
-            with WorkoutLogger(DATA_FILE) as wl:
-                points = wl.get_points(name)
+            with WorkoutLogger(message.guild.id) as wl:
+                points = wl.get_points(id)
             if points == 0:
                 response = "You don't have any more points."
             elif points == 1:
@@ -89,28 +117,40 @@ class CommandHandler:
             response = "You don't have any points to remove!"
         return response
 
-    def _scoreboard(message):
-        DATA_FILE = f"workouts-{message.guild.id}.csv"
-        with WorkoutLogger(DATA_FILE) as wl:
-            sorted_names, name_to_points = wl.get_leaderboard()
-        if not sorted_names:
+    def _scoreboard(message: discord.Message, args) -> str:
+        if args:
+            response = "Command !scoreboard does not take any arguments"
+            return response
+
+        with WorkoutLogger(message.guild.id) as wl:
+            sorted_member_ids, member_id_to_points = wl.get_leaderboard()
+        if not sorted_member_ids:
             return "Scoreboard is empty!"
         table = []
         headers = ["Rank", "Name", "Points"]
-        for i, name in enumerate(sorted_names):
-            # using 14 because that's minimum screen size report by users
+        for i, member_id in enumerate(sorted_member_ids):
+            name = message.guild.get_member(int(member_id)).nick
+            points = member_id_to_points[member_id]
+            # using 14 because that's lowest screen size report by users
             shortened_name = shorten_name(name, 14)
-            table.append([i+1, shortened_name, name_to_points[name]])
+            table.append([i+1, shortened_name, points])
         return "```\n" + tabulate(table, headers) + "\n```"
 
-    def _resetscoreboard(message):
-        DATA_FILE = f"workouts-{message.guild.id}.csv"
-        with WorkoutLogger(DATA_FILE) as wl:
+    def _resetscoreboard(message, args) -> str:
+        if args:
+            response = "Command !resetscoreboard does not take any arguments"
+            return response
+
+        with WorkoutLogger(message.guild.id) as wl:
             wl.reset_leaderboard()
         response = "Scoreboard has been reset!"
         return response
 
-    def _help(message):
+    def _help(message, args):
+        if args:
+            response = "Command !help does not take any arguments"
+            return response
+
         help_items = [
             "!point - add a workout",
             "!loser - remove the last workout",
