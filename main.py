@@ -15,8 +15,6 @@ TOKEN = str(redis_server.get("DISCORD_TOKEN").decode("utf-8"))
 async def on_ready():
     """Handle all startup tasks"""
 
-    print(client.intents.members)
-
     if len(client.guilds) == 0:
         print(f"{client.user} is not connected to any guilds")
     else:
@@ -33,9 +31,8 @@ async def on_ready():
 async def on_message(message: discord.Message):
     """Catch all for messages"""
 
-    # don't react to your own messages
+    # don't react to bots
     if message.author.bot:
-        print("Ignoring message from bot")
         return
 
     response = CommandHandler.handle_command(message)

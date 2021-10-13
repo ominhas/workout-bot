@@ -39,7 +39,7 @@ class WorkoutLogger:
             last_workout_date = datetime.datetime.fromtimestamp(member_history.iloc[-2].time)
             return last_workout_date, len(member_history)
 
-    def remove_last_workout(self, member_id: str):
+    def remove_last_workout(self, member_id: str) -> bool:
         """Removes member's last workout. Returns whether workout was successfully removed"""
 
         member_history_indeces = self.df["member_id"] == member_id
@@ -52,7 +52,7 @@ class WorkoutLogger:
             self.df.drop(last_index, axis=0, inplace=True)
             return True
 
-    def get_points(self, member_id: str):
+    def get_points(self, member_id: str) -> int:
         """Returns how many points member has"""
         return len(self.df[self.df["member_id"] == member_id])
 
@@ -62,7 +62,7 @@ class WorkoutLogger:
         self.df.to_csv(self.data_file+".bak", header=True, index_label=False)
         self.df = pd.DataFrame(columns=["member_id", "time"])
 
-    def get_leaderboard(self):
+    def get_leaderboard(self) -> "tuple[list, dict]":
         """Returns a ranked list of members, and a dictionary from member_id to points"""
 
         member_id_to_points = dict()

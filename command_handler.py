@@ -5,7 +5,7 @@ import datetime
 import discord
 
 
-def pretty_delta(date: datetime.datetime, now: datetime.datetime):
+def pretty_delta(date: datetime.datetime, now: datetime.datetime) -> str:
     """Pretty time difference for saying how long ago workout was.
 
     < 0 => "in the future?"
@@ -46,16 +46,16 @@ def pretty_delta(date: datetime.datetime, now: datetime.datetime):
         return date.strftime("on %B %d, %Y")
 
 
-def shorten_name(name, length=None):
+def shorten_name(name: str, length: int = -1) -> str:
     """Removes id portion of name, and if name is still longer than length,
     shortens it with ellipses. If length is None, then don't shorten with ellipses.
     """
     if "#" in name:
         raise Exception("Warning: passed name with '#' in it")
-    if length is not None and length < 3:
+    if length >= 0 and length < 3:
         raise Exception(f"shorten_name requires length >= 3, got {length}")
 
-    if length is None or len(name) <= length:
+    if length < 0 or len(name) <= length:
         return name
     else:
         return name[:length-3] + "."*3
@@ -64,7 +64,7 @@ def shorten_name(name, length=None):
 class CommandHandler:
     def handle_command(message: discord.Message):
         # remove surrounding white space
-        text = message.content.strip()
+        text: str = message.content.strip()
         # only look at commands starting with "!"
         if text[0] != "!":
             return None
@@ -78,9 +78,12 @@ class CommandHandler:
 
         # extract args list by seperating out words, ignoring multiple spaces
         args = [a for a in text.split(" ")[1:] if a]
-        return function(message, args)
 
-    def _point(message: discord.Message, args) -> str:
+        # the response can indicate that the command worked, or why it failed
+        response: str = function(message, args)
+        return response
+
+    def _point(message: discord.Message, args: "list[str]") -> str:
         if args:
             response = "Command !point does not take any arguments"
             return response
@@ -96,7 +99,7 @@ class CommandHandler:
             response = f"You now have {points} points. The workout before this was {pretty_delta(last_workout_date, now)}."
         return response
 
-    def _loser(message: discord.Message, args) -> str:
+    def _loser(message: discord.Message, args: "list[str]") -> str:
         if args:
             response = "Command !loser does not take any arguments"
             return response
@@ -117,7 +120,7 @@ class CommandHandler:
             response = "You don't have any points to remove!"
         return response
 
-    def _scoreboard(message: discord.Message, args) -> str:
+    def _scoreboard(message: discord.Message, args: "list[str]") -> str:
         if args:
             response = "Command !scoreboard does not take any arguments"
             return response
@@ -136,7 +139,7 @@ class CommandHandler:
             table.append([i+1, shortened_name, points])
         return "```\n" + tabulate(table, headers) + "\n```"
 
-    def _resetscoreboard(message, args) -> str:
+    def _resetscoreboard(message: discord.Message, args: "list[str]") -> str:
         if args:
             response = "Command !resetscoreboard does not take any arguments"
             return response
@@ -146,7 +149,7 @@ class CommandHandler:
         response = "Scoreboard has been reset!"
         return response
 
-    def _help(message, args):
+    def _help(message: discord.Message, args: "list[str]"):
         if args:
             response = "Command !help does not take any arguments"
             return response
