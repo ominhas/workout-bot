@@ -5,6 +5,7 @@ import os
 
 class WorkoutLogger:
     def __init__(self, guild_id: str):
+        self.guild_id = guild_id
         self.data_file = f"workouts-{guild_id}.csv"
 
     def __enter__(self):
@@ -58,8 +59,12 @@ class WorkoutLogger:
 
     def reset_leaderboard(self):
         """Creates a backup and resets the leaderboard"""
-        # Note: there will only be one backup
-        self.df.to_csv(self.data_file+".bak", header=True, index_label=False)
+        # save a backup with date and time of when backup was created
+        time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+        save_data_file = f"workouts-{self.guild_id}-{time_str}.csv"
+        self.df.to_csv(save_data_file, header=True, index_label=False)
+
+        # create a new dataframe which will be saved over current on in __exit__
         self.df = pd.DataFrame(columns=["member_id", "time"])
 
     def get_leaderboard(self) -> "tuple[list, dict]":

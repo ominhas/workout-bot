@@ -26,7 +26,6 @@ async def on_ready():
     print("\nReady!")
 
 
-
 @client.event
 async def on_message(message: discord.Message):
     """Catch all for messages"""
@@ -34,6 +33,13 @@ async def on_message(message: discord.Message):
     # don't react to bots
     if message.author.bot:
         return
+
+    # first just ignore any messages that don't start with "!" for efficiency
+    if not message.content.strip().startswith("!"):
+        return
+
+    # get latest list of members
+    await message.guild.query_members(query="")
 
     response = CommandHandler.handle_command(message)
     if response is not None:

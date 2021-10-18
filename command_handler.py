@@ -66,7 +66,7 @@ class CommandHandler:
         # remove surrounding white space
         text: str = message.content.strip()
         # only look at commands starting with "!"
-        if text[0] != "!":
+        if len(text) == 0 or text[0] != "!":
             return None
 
         # extract the root of the command (ie. "!point 12" -> "point")
@@ -132,11 +132,28 @@ class CommandHandler:
         table = []
         headers = ["Rank", "Name", "Points"]
         for i, member_id in enumerate(sorted_member_ids):
-            name = message.guild.get_member(int(member_id)).nick
+            member = message.guild.get_member(int(member_id))
+            if member is not None:
+                if member.nick is not None:
+                    name = member.nick
+                else:
+                    name = member.name
+            else:
+                # member not found if someone leaves the channel
+                name = "member_not_found"
+
             points = member_id_to_points[member_id]
             # using 14 because that's lowest screen size report by users
             shortened_name = shorten_name(name, 14)
-            table.append([i+1, shortened_name, points])
+
+            # calculate rank so that people with same points have same rank
+            if len(table) != 0 and table[-1][2] == points:
+                # if previous person's points are the same as yours, don't increase rank
+                rank = table[-1][0]
+            else:
+                rank = i+1
+
+            table.append([rank, shortened_name, points])
         return "```\n" + tabulate(table, headers) + "\n```"
 
     def _resetscoreboard(message: discord.Message, args: "list[str]") -> str:
@@ -164,10 +181,11 @@ class CommandHandler:
         return "\n".join(help_items)
 
 
+
 COMMAND_MAP = {
     "point": CommandHandler._point,
     "loser": CommandHandler._loser,
     "scoreboard": CommandHandler._scoreboard,
     "resetscoreboard": CommandHandler._resetscoreboard,
-    "help": CommandHandler._help
+    "help": CommandHandler._help,
 }
