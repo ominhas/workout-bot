@@ -29,8 +29,3 @@ python3 main.py
 ```bash
 nohup python3 main.py &
 ```
-
-### TODO
-1. Add unit testing
-2. Add a voting system for resetscoreboard?
-3. Use Bot instead of Client https://discordpy.readthedocs.io/en/stable/ext/commands/commands.html
