@@ -105,3 +105,4 @@ def test_get_points():
         wl.add_workout("1111", 1e3)
         assert wl.get_points("1111") == 2
         assert wl.get_points("2222") == 20
+    clear_file(test_id)

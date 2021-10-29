@@ -68,7 +68,6 @@ class WorkoutLogger:
 
     def get_leaderboard(self) -> "tuple[list, dict]":
         """Returns a ranked list of members, and a dictionary from member_id to points"""
-
         member_id_to_points = dict()
         member_id_to_last_workout = dict()
         for index, row in self.df.iterrows():
