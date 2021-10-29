@@ -26,10 +26,9 @@ class WorkoutLogger:
         """Saves the database"""
         self.df.to_csv(self.data_file, header=True, index_label=False)
 
-    def add_workout(self, member_id: str):
+    def add_workout(self, member_id: str, time: float):
         """Adds workout to database and returns a time since last workout (or None)"""
 
-        time = datetime.datetime.now().timestamp()
         new_row = pd.DataFrame([[member_id, time]], columns=["member_id", "time"])
         self.df = self.df.append(new_row, ignore_index=True)
         member_history = self.df[self.df["member_id"] == member_id]

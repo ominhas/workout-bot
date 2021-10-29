@@ -88,10 +88,10 @@ class CommandHandler:
             response = "Command !point does not take any arguments"
             return response
 
-        # validate args
         id = str(message.author.id)
+        time = datetime.datetime.now().timestamp()
         with WorkoutLogger(message.guild.id) as wl:
-            last_workout_date, points = wl.add_workout(id)
+            last_workout_date, points = wl.add_workout(id, time)
         if last_workout_date is None:
             response = "You now have 1 point. Congrats on the first workout!"
         else:
