@@ -1,12 +1,17 @@
+import pathlib
 import pandas as pd
 import datetime
 import os
+from pathlib import Path
 
+
+DATA_FOLDER = pathlib.Path.home() / ".workout_bot"
 
 class WorkoutLogger:
     def __init__(self, guild_id: str):
         self.guild_id = guild_id
-        self.data_file = f"workouts-{guild_id}.csv"
+        DATA_FOLDER.mkdir(parents=True, exist_ok=True)
+        self.data_file = DATA_FOLDER / f"workouts-{guild_id}.csv"
 
     def __enter__(self):
         """Loads the database"""
@@ -60,7 +65,7 @@ class WorkoutLogger:
         """Creates a backup and resets the leaderboard"""
         # save a backup with date and time of when backup was created
         time_str = datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
-        save_data_file = f"workouts-{self.guild_id}-{time_str}.csv"
+        save_data_file = DATA_FOLDER / f"workouts-{self.guild_id}-{time_str}.csv"
         self.df.to_csv(save_data_file, header=True, index_label=False)
 
         # create a new dataframe which will be saved over current on in __exit__

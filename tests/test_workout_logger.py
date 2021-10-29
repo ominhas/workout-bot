@@ -1,9 +1,10 @@
 from workout_logger import WorkoutLogger
 import pandas as pd
 import os
+from pathlib import Path
 
 def clear_file(guild_id):
-    filename = f"workouts-{guild_id}.csv"
+    filename = Path.home() / ".workout_bot" / f"workouts-{guild_id}.csv"
     if os.path.exists(filename):
         os.remove(filename)
 
