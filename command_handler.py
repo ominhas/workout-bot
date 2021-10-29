@@ -96,7 +96,7 @@ class CommandHandler:
             response = "You now have 1 point. Congrats on the first workout!"
         else:
             now = datetime.datetime.now()
-            response = f"You now have {points} points. The workout before this was {pretty_delta(last_workout_date, now)}."
+            response = f"You now have {points} points. Your last workout was {pretty_delta(last_workout_date, now)}."
         return response
 
     def _loser(message: discord.Message, args: "list[str]") -> str:

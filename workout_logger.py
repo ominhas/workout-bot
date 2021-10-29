@@ -90,8 +90,8 @@ class WorkoutLogger:
             for member_id in points_to_member_ids[points]:
                 last_workout = member_id_to_last_workout[member_id]
                 last_workout_to_member_ids[last_workout] = member_id
-            # sort by increasing last_workout time
-            for last_workout in sorted(last_workout_to_member_ids):
+            # sort by decreasing last_workout time
+            for last_workout in sorted(last_workout_to_member_ids)[::-1]:
                 member_id = last_workout_to_member_ids[last_workout]
                 sorted_member_ids.append(member_id)
 
