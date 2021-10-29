@@ -188,10 +188,14 @@ class CommandHandler:
             response = "Command !resetscoreboard does not take any arguments"
             return response
 
-        with WorkoutLogger(message.guild.id) as wl:
-            wl.reset_leaderboard()
-        response = "Scoreboard has been reset!"
-        return response
+        if message.author.permissions_in(message.channel).administrator:
+            with WorkoutLogger(message.guild.id) as wl:
+                wl.reset_leaderboard()
+            response = "Scoreboard has been reset!"
+            return response
+        else:
+            response = "You need administrator permissions for that"
+            return response
 
     def _help(message: discord.Message, args: "list[str]"):
         if args:
