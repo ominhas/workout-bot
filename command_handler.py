@@ -3,6 +3,7 @@ from workout_logger import WorkoutLogger
 from tabulate import tabulate
 import datetime
 import discord
+import re
 
 
 def pretty_delta(date: datetime.datetime, now: datetime.datetime) -> str:
@@ -85,18 +86,44 @@ class CommandHandler:
 
     def _point(message: discord.Message, args: "list[str]") -> str:
         if args:
-            response = "Command !point does not take any arguments"
-            return response
+            if len(args) != 1:
+                response = "Command !point only takes up to one argument"
+                return response
 
-        id = str(message.author.id)
+            # ex. <@!012345678912345678>
+            if not re.match(r"\<@![0-9]+>$", args[0]):
+                response = "To set points for another member, use @"
+                return response
+
+            test_id = args[0][3:-1]
+            member = message.guild.get_member(int(test_id))
+            if member is None:
+                response = "Could not match this user id to member of this server"
+                return response
+
+            id = test_id
+            if member.nick is not None:
+                name = member.nick
+            else:
+                name = member.name
+        else:
+            id = str(message.author.id)
+            name = None
+
         time = datetime.datetime.now().timestamp()
         with WorkoutLogger(message.guild.id) as wl:
             last_workout_date, points = wl.add_workout(id, time)
         if last_workout_date is None:
-            response = "You now have 1 point. Congrats on the first workout!"
+            if name is None:
+                response = "You now have 1 point. Congrats on the first workout!"
+            else:
+                response = f"{name} now has 1 point. Congrats on the first workout!"
         else:
             now = datetime.datetime.now()
-            response = f"You now have {points} points. Your last workout was {pretty_delta(last_workout_date, now)}."
+            if name is None:
+                response = f"You now have {points} points. Your last workout was over {pretty_delta(last_workout_date, now)}."
+            else:
+                response = f"{name} now has {points} points. Their last workout was over {pretty_delta(last_workout_date, now)}."
         return response
 
     def _loser(message: discord.Message, args: "list[str]") -> str:
@@ -172,14 +199,13 @@ class CommandHandler:
             return response
 
         help_items = [
-            "!point - add a workout",
+            "!point - add a workout (optionally @ someone to add a point for them",
             "!loser - remove the last workout",
             "!scoreboard - show the rankings",
             "!resetscoreboard - remove all workouts",
             "!help - show this help text"
         ]
         return "\n".join(help_items)
-
 
 
 COMMAND_MAP = {
