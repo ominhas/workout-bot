@@ -91,11 +91,12 @@ class CommandHandler:
                 return response
 
             # ex. <@!012345678912345678>
-            if not re.match(r"\<@![0-9]+>$", args[0]):
+            match = re.match(r"\<@!?([0-9]+)>$", args[0])
+            if match is None:
                 response = "To set points for another member, use @ (ex. !point @WorkoutTrackerBot)"
                 return response
 
-            test_id = args[0][3:-1]
+            test_id = match.groups()[0]
             member = message.guild.get_member(int(test_id))
             if member is None:
                 response = "Could not match this user id to member of this server"
@@ -133,11 +134,12 @@ class CommandHandler:
                 return response
 
             # ex. <@!012345678912345678>
-            if not re.match(r"\<@![0-9]+>$", args[0]):
-                response = "To remove points from another member, use @ (ex. !loser @WorkoutTrackerBot)"
+            match = re.match(r"\<@!?([0-9]+)>$", args[0])
+            if match is None:
+                response = "To set points for another member, use @ (ex. !point @WorkoutTrackerBot)"
                 return response
 
-            test_id = args[0][3:-1]
+            test_id = match.groups()[0]
             member = message.guild.get_member(int(test_id))
             if member is None:
                 response = "Could not match this user id to member of this server"
