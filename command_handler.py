@@ -203,10 +203,10 @@ class CommandHandler:
             return response
 
         help_items = [
-            "!point - add a workout (optionally @ someone to add a point for them",
-            "!loser - remove the last workout",
+            "!point - add a workout for yourself (or @ someone to add a point for them instead)",
+            "!loser - remove your last workout",
             "!scoreboard - show the rankings",
-            "!resetscoreboard - remove all workouts",
+            "!resetscoreboard - clear all workouts",
             "!help - show this help text"
         ]
         return "\n".join(help_items)
