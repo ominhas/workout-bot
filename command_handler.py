@@ -92,7 +92,7 @@ class CommandHandler:
 
             # ex. <@!012345678912345678>
             if not re.match(r"\<@![0-9]+>$", args[0]):
-                response = "To set points for another member, use @"
+                response = "To set points for another member, use @ (ex. !point @WorkoutTrackerBot)"
                 return response
 
             test_id = args[0][3:-1]
@@ -128,23 +128,55 @@ class CommandHandler:
 
     def _loser(message: discord.Message, args: "list[str]") -> str:
         if args:
-            response = "Command !loser does not take any arguments"
-            return response
+            if len(args) != 1:
+                response = "Command !loser only takes up to one argument"
+                return response
 
-        id = str(message.author.id)
+            # ex. <@!012345678912345678>
+            if not re.match(r"\<@![0-9]+>$", args[0]):
+                response = "To remove points from another member, use @ (ex. !loser @WorkoutTrackerBot)"
+                return response
+
+            test_id = args[0][3:-1]
+            member = message.guild.get_member(int(test_id))
+            if member is None:
+                response = "Could not match this user id to member of this server"
+                return response
+
+            id = test_id
+            if member.nick is not None:
+                name = member.nick
+            else:
+                name = member.name
+        else:
+            id = str(message.author.id)
+            name = None
+
         with WorkoutLogger(message.guild.id) as wl:
             removed_test = wl.remove_last_workout(id)
         if removed_test:
             with WorkoutLogger(message.guild.id) as wl:
                 points = wl.get_points(id)
             if points == 0:
-                response = "You don't have any more points."
+                if name is None:
+                    response = "You don't have any more points."
+                else:
+                    response = f"{name} doesn't have any more points."
             elif points == 1:
-                response = "You have 1 point left."
+                if name is None:
+                    response = "You have 1 point left."
+                else:
+                    response = f"{name} has 1 point left."
             else:
-                response = f"You have {points} points left."
+                if name is None:
+                    response = f"You have {points} points left."
+                else:
+                    response = f"{name} has {points} points left."
         else:
-            response = "You don't have any points to remove!"
+            if name is None:
+                response = "You don't have any points to remove!"
+            else:
+                response = f"{name} doesn't have any points to remove!"
         return response
 
     def _scoreboard(message: discord.Message, args: "list[str]") -> str:
@@ -204,7 +236,7 @@ class CommandHandler:
 
         help_items = [
             "!point - add a workout for yourself (or @ someone to add a point for them instead)",
-            "!loser - remove your last workout",
+            "!loser - remove your last workout (or @ someone to remove their last workout instead)",
             "!scoreboard - show the rankings",
             "!resetscoreboard - clear all workouts",
             "!help - show this help text"
