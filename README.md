@@ -1,6 +1,6 @@
 # workout-bot
 
-This creates a Discord bot that you can use to track workouts, and show a leaderboard based on who has tracked the most points. It keeps a log of when the workout was added to break ties.
+This creates a Discord bot that you can use to track workouts, and show a leaderboard based on who has tracked the most points.
 
 ### Setup
 1. Clone the repository
@@ -29,7 +29,3 @@ python3 main.py
 ```bash
 nohup python3 main.py &
 ```
-
-### TODO
-1. Add unit testing
-2. Add a voting system for resetscoreboard?
